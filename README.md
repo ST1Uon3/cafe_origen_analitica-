@@ -1,4 +1,4 @@
-# Café Origen – Motor de analítica de ventas (v0.1)
+# Café Origen – Motor de analítica de ventas (v0.2)
 
 ## ¿Qué es?
 Un programa en JavaScript (Node.js) que lee el historial de ventas de Café Origen y genera un reporte de negocio legible en la consola, sin necesidad de abrir el código.
@@ -19,6 +19,7 @@ Otros comandos:
     node src\medir.js       (cuenta las operaciones de cada función al crecer los datos)
     node src\medirRecurrentes.js   (mide el tiempo de clientesRecurrentes al crecer los datos)
     node src\comparar.js   (compara tiempo y memoria de una cadena de métodos y un recorrido único)
+    node src\medirRendimiento.js   (mide todas las funciones y actualiza RENDIMIENTO.md)
 
 Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 
@@ -34,6 +35,7 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - ¿Cuánto crece el trabajo de cada función cuando crecen los datos?
 - ¿Qué clientes compraron más de una vez?
 - ¿Cuánta memoria adicional usa cada versión de un cálculo?
+- ¿Cuánto tardaría cada reporte con 1.000.000 de ventas y qué conviene optimizar primero?
 
 ## Estructura
 - `src/datos.js`: ventas originales (12 registros, con sus errores)
@@ -47,6 +49,8 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - `src/medir.js`: cuenta las operaciones de cada función al crecer n
 - `src/medirRecurrentes.js`: mide y estima el tiempo de clientesRecurrentes
 - `src/comparar.js`: compara una cadena de métodos con un recorrido único
+- `src/medirRendimiento.js`: mide el rendimiento de todas las funciones
+- `RENDIMIENTO.md`: informe técnico de rendimiento (tiempo, memoria, proyección y riesgos)
 
 ## Decisiones importantes
 - Las ventas con cantidad 0 no cuentan como ventas válidas en el ticket promedio.
