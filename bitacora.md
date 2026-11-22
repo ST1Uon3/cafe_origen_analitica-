@@ -580,3 +580,62 @@ Optimización del reporte de clientes recurrentes.
   - con Map: un diccionario cliente → cantidad de compras.
 - **Algoritmo:** recorrer las ventas una sola vez y, para cada una, consultar y actualizar la estructura.
 - **Complejidad esperada:** tiempo O(n), memoria O(c), con c = clientes distintos (c ≤ n).
+
+## Verificación de las tres versiones — Punto 4, minireto 1 del día 3
+
+- Ejecuté src/verificarRecurrentes.js con los datos del Día 1, 5.000 ventas generadas y los casos borde (vacío, una venta, nadie repite, un cliente 4 veces y A, B, B, A).
+- Las tres versiones devolvieron los mismos clientes al compararlos ordenados, sin repetidos, y el resultado fue TODO OK.
+- El orden sí cambia: con A, B, B, A, la original y la de Map dan [A, B] y la de Set da [B, A]. Por eso se compara ordenado.
+
+
+## Mediciones de las tres versiones — Punto 5, minireto 1 del día 3
+
+Medido en mi computador con Node.js, con ventas generadas al azar (src/medirOptimizacion.js). La versión original se ejecuta solo si su tiempo estimado es menor a 1 minuto.
+
+| n | Original | Set | Map | Original ÷ Set |
+|---|---|---|---|---|
+| 1.000 | 4,18 ms | 480,8 µs | 326,7 µs | 9× |
+| 10.000 | 779,86 ms | 1,14 ms | 1,11 ms | 682× |
+| 100.000 | ≈ 78,0 s (estimado, no se ejecutó) | 16,99 ms | 13,53 ms | - |
+
+### Original
+- Al pasar de 1.000 a 10.000 ventas (n × 10), el tiempo se multiplicó por ≈ 187 (de 4,18 ms a 779,86 ms). Para O(n²) se espera ≈ ×100. Sale más porque con 4 ms pesan el calentamiento y el costo oculto de includes, que también crece con n. Lo importante es que crece mucho más rápido que ×10, que es lo esperado en O(n) y no en O(n²).
+- Con 100.000 ventas no se ejecutó: la estimación fue 779,86 ms × 100 = 78,0 s, mayor al límite de 1 minuto.
+
+### Set y Map
+- Set: de 1.000 a 10.000 se multiplicó por ≈ 2,4 y de 10.000 a 100.000 por ≈ 15. Map: por ≈ 3,4 y por ≈ 12. Para O(n) se espera ≈ ×10 en cada salto. Se desvía hacia los dos lados porque a estos tiempos (microsegundos y pocos milisegundos) pesan el calentamiento, el crecimiento de la tabla hash y la caché del procesador.
+- En conjunto, de 1.000 a 100.000 ventas (n × 100) el tiempo de Set se multiplicó por ≈ 35 y el de Map por ≈ 41. Es un crecimiento cercano al lineal y muy lejos del ×10.000 que tendría un algoritmo O(n²).
+
+### Comparación
+- Con 10.000 ventas, Set es 682 veces más rápido que la original.
+- Con 100.000 ventas, usando la estimación de la original (78,0 s), Set sería ≈ 4.590 veces más rápido y Map ≈ 5.760 veces. Estos dos valores son estimados, porque la original no se ejecutó.
+
+### Requisito del marketplace (menos de 1 s con 100.000 ventas)
+- Set: CUMPLE con 16,99 ms (≈ 59 veces menos que el límite).
+- Map: CUMPLE con 13,53 ms (≈ 74 veces menos que el límite).
+- La versión original, con una estimación de 78,0 s, no cumpliría.
+
+
+## Intercambio entre tiempo y memoria — Punto 6, minireto 1 del día 3
+
+### Qué se gana
+- El tiempo baja de O(n²) a O(n). Con 100.000 ventas, de casi 5.000 millones de comparaciones a unas 100.000 visitas.
+- La causa es que la búsqueda de un cliente deja de recorrer una lista y pasa a ser una consulta casi directa. Set y Map son tablas hash: calculan dónde está cada valor, así que has, add, get y set toman un tiempo casi constante en promedio.
+
+### Qué se paga
+- La memoria adicional sube. La original guardaba solo los recurrentes (O(r)). Las nuevas guardan a todos los clientes distintos:
+  - Set: O(c) en vistos y O(r) en recurrentes (un cliente recurrente queda en los dos Set).
+  - Map: O(c), una entrada por cliente con su cantidad de compras.
+- c puede llegar a ser n (si nadie repite). En los datos generados c ≈ n/3; con 100.000 ventas son unas 33.000 entradas, que son pocos megabytes. En un negocio real suele haber muchos menos clientes que ventas.
+
+### Valió la pena
+- Sí: se paga una cantidad pequeña de memoria (decenas de miles de entradas) para pasar de minutos a milisegundos, y se cumple el requisito del marketplace de menos de 1 s con 100.000 ventas.
+- Un servidor con memoria limitada soporta guardar los clientes distintos con mucho margen; no soportaría esperar minutos por cada reporte.
+
+### Set contra Map
+- Set es más simple si solo hace falta saber si un cliente se repite.
+- Map guarda además cuántas veces compró cada cliente, con la misma complejidad. Eso permite otros reportes (por ejemplo el cliente que más compró) sin recorrer las ventas otra vez.
+- El orden del resultado: Map conserva el orden de la primera aparición (igual que la versión original); Set sale en el orden de la segunda compra.
+
+### Regla general
+Cuando hay una búsqueda dentro de un ciclo, hay que preguntarse qué información se puede guardar para no volver a buscarla. Casi siempre se cambia un poco de memoria por mucho tiempo.
