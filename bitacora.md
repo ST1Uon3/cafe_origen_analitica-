@@ -496,3 +496,87 @@ Se cuenta la memoria adicional que crea cada función, sin contar el arreglo ven
 - **Alternativa intermedia no elegida:** un solo reduce con la condición adentro (una pasada, sin arreglos intermedios, estilo funcional).
 - **Observación:** totalCiudadUnaPasada es funcionalmente igual a ventasPorCiudad (primer día). No las unifico ahora para no romper verificar.js ni reporte.js.
 - **Qué hice con la otra:** totalCiudadCadena sale del motor y se conserva en src/comparar.js solo como referencia de la comparación.
+
+
+---
+
+# DÍA 2 — MINIRETO 4
+Informe técnico de rendimiento (v0.2).
+
+## Revisión del informe y respuesta — Punto 6, minireto 4 del día 2
+
+- **Revisor:** Claude (asistente de IA)
+- **Fecha de la revisión:** 22/11/2026
+- **Cómo se revisó:** leyó el contenido de RENDIMIENTO.md (estructura, justificaciones, riesgos y plan). No ejecutó el script en mi computador.
+
+### Observación 1
+- **Observación del revisor:** la complejidad espacial no tiene evidencia medida; el informe promete evidencia pero solo los tiempos se midieron.
+- **Mi respuesta:** Acepto en parte.
+- **Por qué:** tiene razón en que falta evidencia. No voy a medir la memoria de todas las funciones con process.memoryUsage porque el recolector de basura hace esa medición poco confiable. Sí puedo respaldar el caso más importante con un dato exacto: los arreglos nuevos y los elementos guardados que cuenta comparar.js.
+- **Qué cambié en RENDIMIENTO.md:** agregué la sección "Evidencia de memoria" bajo la tabla, con los datos de comparar.js, y aclaré que el resto de la columna de espacio es análisis del código.
+
+### Observación 2
+- **Observación del revisor:** Riesgos afirma que el peor caso de clientesRecurrentes es O(n³), pero el informe no muestra la prueba.
+- **Mi respuesta:** Acepto.
+- **Por qué:** la medición existe (medirRecurrentes.js, tabla "datos al azar contra peor caso"), pero un lector del marketplace no ve la bitácora.
+- **Qué cambié en RENDIMIENTO.md:** agregué en Riesgos la subsección "Evidencia del peor caso de clientesRecurrentes" con los tiempos medidos.
+
+### Observación 3
+- **Observación del revisor:** totalCiudadCadena aparece en el puesto 2 del ranking sin decir que no está en el motor.
+- **Mi respuesta:** Acepto.
+- **Por qué:** el ranking es del motor, y esa función solo se conserva como referencia (decisión del minireto 3).
+- **Qué cambié en RENDIMIENTO.md:** en la tabla de Riesgos, la celda queda como "totalCiudadCadena (referencia, no está en el motor)".
+
+
+
+---
+
+# DÍA 3 — MINIRETO 1
+Optimización del reporte de clientes recurrentes.
+
+## Método de resolución de retos — Punto 1, minireto 1 del día 3
+
+### 1. Entender el problema
+
+- **Entrada:** un arreglo ventas de n objetos; de cada uno solo se usa la propiedad cliente (texto, por ejemplo "C01").
+- **Salida:** un arreglo con los códigos de los clientes que compraron más de una vez, cada uno una sola vez.
+- **Restricciones:**
+  - Con 100.000 ventas debe responder en menos de 1 segundo (exigencia del marketplace).
+  - El servidor tiene memoria limitada.
+  - No debe modificar el arreglo ventas.
+  - El orden del resultado no importa; las versiones se compararán ordenadas.
+- **Decisiones sobre qué cuenta como compra:**
+  - Cada fila de ventas es una compra, aunque tenga cantidad 0 (la versión original hace lo mismo).
+  - Los códigos de cliente se comparan tal cual, sin normalizar ("C01" y "c01" serían distintos).
+
+### 2. Ejemplos y casos borde
+
+| Caso | Clientes de entrada | Salida esperada |
+|---|---|---|
+| Arreglo vacío | [] | [] |
+| Una sola venta | [C01] | [] |
+| Nadie repite | [C01, C02, C03] | [] |
+| Dos compras del mismo cliente | [C01, C01] | [C01] |
+| Un cliente compra muchas veces | [C01, C01, C01, C01] | [C01] (una sola vez) |
+| Varios recurrentes | [C01, C02, C01, C02] | C01 y C02 (el orden no importa) |
+| El orden puede cambiar | [A, B, B, A] | A y B (la original da [A, B], la de Set da [B, A]) |
+| Datos del Día 1 | 12 ventas | C01, C02 y C03 |
+| Cantidad 0 repetida | C06 con cantidad 0 y C06 con cantidad 3 | [C06] (la fila con cantidad 0 cuenta como compra) |
+| Cantidad 0 sola | C06 aparece una vez, con cantidad 0 | no es recurrente |
+
+### 3. Fuerza bruta y su complejidad
+
+- **Idea:** comparar cada venta con todas las que vienen después. Si dos son del mismo cliente y el cliente no está en la lista de recurrentes, se agrega (es la función clientesRecurrentes original).
+- **Tiempo:** O(n²), con n(n − 1)/2 comparaciones. Con 100.000 ventas son 4.999.950.000 comparaciones.
+- **Costo oculto:** recurrentes.includes recorre la lista dentro de los dos ciclos; en el peor caso el total llega a O(n³).
+- **Memoria:** O(r), con r = clientes recurrentes (r ≤ n/2).
+- **Evidencia (Día 2):** con 16.000 ventas tardó  2.1 segundos y se estimó 2.3 horas para 1.000.000.
+
+### 4. Idea de optimización
+
+- **Qué trabajo se repite:** para saber si un cliente se repite, la fuerza bruta lo vuelve a buscar desde cero en cada vuelta, y includes vuelve a recorrer la lista de recurrentes.
+- **Qué guardar:** una estructura de búsqueda en tiempo constante con lo que ya vimos:
+  - con Set: un conjunto de clientes ya vistos y otro de recurrentes;
+  - con Map: un diccionario cliente → cantidad de compras.
+- **Algoritmo:** recorrer las ventas una sola vez y, para cada una, consultar y actualizar la estructura.
+- **Complejidad esperada:** tiempo O(n), memoria O(c), con c = clientes distintos (c ≤ n).

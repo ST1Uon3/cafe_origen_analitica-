@@ -219,6 +219,42 @@ function totalCiudadUnaPasada(ventas, ciudad) {
   return total;
 }
 
+// ===== Día 3, minireto 1: optimización de clientes recurrentes =====
+
+// Con dos Set: uno de clientes ya vistos y otro de recurrentes
+function clientesRecurrentesSet(ventas) {
+  const vistos = new Set();
+  const recurrentes = new Set();
+  for (const venta of ventas) {
+    if (vistos.has(venta.cliente)) {
+      recurrentes.add(venta.cliente);  // ya lo habíamos visto: es recurrente
+    } else {
+      vistos.add(venta.cliente);       // primera vez que lo vemos
+    }
+  }
+  return [...recurrentes];
+}
+
+// Con un Map: cliente -> cantidad de compras
+function comprasPorCliente(ventas) {
+  const compras = new Map();
+  for (const venta of ventas) {
+    compras.set(venta.cliente, (compras.get(venta.cliente) || 0) + 1);
+  }
+  return compras;
+}
+
+// Los recurrentes salen del Map: los que tienen más de 1 compra
+function clientesRecurrentesMap(ventas) {
+  const recurrentes = [];
+  for (const [cliente, cantidad] of comprasPorCliente(ventas)) {
+    if (cantidad > 1) {
+      recurrentes.push(cliente);
+    }
+  }
+  return recurrentes;
+}
+
 module.exports = {
   valorVenta,
   normalizar,
@@ -240,4 +276,7 @@ module.exports = {
   primeraVenta,
   clientesRecurrentes,
   totalCiudadUnaPasada,
+  clientesRecurrentesSet,
+  comprasPorCliente,
+  clientesRecurrentesMap,
 };
