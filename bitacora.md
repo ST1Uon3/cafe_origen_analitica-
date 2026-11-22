@@ -264,3 +264,39 @@ Generador de datos y medición del crecimiento del trabajo.
 | primeraVenta | no cambian (×1) | Accede directo a la posición 0 sin recorrer nada. |
 
 **Predicción numérica con n = 100:** totalVendido ≈ 100, ventaMayor ≈ 300, totalPorCiudad ≈ 200, primeraVenta = 1.
+
+## Resultados, comparación con la predicción y clasificación — Punto 6, minireto 1 del día 2
+
+### Resultados medidos (operaciones)
+
+| n | totalVendido | ventaMayor | totalPorCiudad | primeraVenta |
+|---|---|---|---|---|
+| 100 | 100 | 299 | 200 | 1 |
+| 1.000 | 1.000 | 2.999 | 2.000 | 1 |
+| 10.000 | 10.000 | 29.999 | 20.000 | 1 |
+| 100.000 | 100.000 | 299.999 | 200.000 | 1 |
+
+### Predicción contra resultado
+
+| Función | Predicción | Resultado | ¿Acerté? |
+|---|---|---|---|
+| totalVendido | ×10 | ×10.00 | Sí |
+| ventaMayor | ×10 | ×10.03 y luego ×10.00 | Sí |
+| totalPorCiudad | ×10 | ×10.00 | Sí |
+| primeraVenta | ×1 | ×1.00 | Sí |
+
+Predicción numérica con n = 100: totalVendido ≈ 100, ventaMayor ≈ 300 y totalPorCiudad ≈ 200. Resultado: 100, 299 y 200. El pequeño desvío de ventaMayor (299 en vez de 300) es porque la comparación de valores empieza desde la segunda venta.
+
+### Clasificación
+
+| Función | Clasificación | Justificación con el código | Justificación con los números |
+|---|---|---|---|
+| totalVendido | O(n) | Un solo ciclo for...of que visita cada venta una vez. | Hace exactamente n operaciones; al multiplicar n por 10, se multiplican por 10. |
+| ventaMayor | O(n) | Un solo ciclo con un número fijo de comparaciones por vuelta. | Hace 3n − 1 operaciones; la razón de crecimiento es ≈ 10. |
+| totalPorCiudad | O(n) | Un solo ciclo; cada vuelta busca la clave directamente en el diccionario, sin recorrer los grupos. | Hace 2n operaciones; la razón de crecimiento es 10.00. |
+| primeraVenta | O(1) | Accede a ventas[0] sin ciclo. | Siempre hace 1 operación, con 100 o con 100.000 ventas. |
+
+### Observaciones
+- Ninguna función es O(n²), porque ninguna tiene un ciclo dentro de otro ciclo. Si existiera una, al multiplicar n por 10 sus operaciones se multiplicarían por 100.
+- Las constantes (3n − 1, 2n) no cambian la clasificación: lo que importa es que el trabajo crece en proporción directa a n.
+- Para sumar n ventas hay que visitarlas todas, así que O(n) es lo mínimo posible en estas tres funciones; no se puede hacer mejor.
