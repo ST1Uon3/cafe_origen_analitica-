@@ -6,9 +6,10 @@
 
 ---
 
-## Día 1
 
-## PRIMER MINIRETO
+# PRIMER MINIRETO 
+
+# DÍA 1 — PRIMER MINIRETO
 Configuración del proyecto y exploración de los datos.
 
 ## Diccionario de datos — Punto 5, primer minireto
@@ -45,7 +46,9 @@ Configuración del proyecto y exploración de los datos.
 
 ---
 
-## SEGUNDO MINIRETO
+# SEGUNDO MINIRETO
+
+# DÍA 1 — SEGUNDO MINIRETO
 Indicadores de negocio calculados con ciclos manuales.
 
 ## Plan en pseudocódigo — Punto 1, segundo minireto
@@ -148,7 +151,9 @@ Total válido: 985000. Ticket promedio = 985000 / 11 ≈ 89545.45. Coincide con 
 
 ---
 
-## TERCER MINIRETO
+# TERCER MINIRETO
+
+# DÍA 1 — TERCER MINIRETO
 Indicadores con métodos de arreglo, agrupaciones y rankings.
 
 ## Preguntas que responde cada función — Punto 6, tercer minireto
@@ -204,3 +209,58 @@ Indicadores con métodos de arreglo, agrupaciones y rankings.
 
 Ejecuté verificar.js con el arreglo completo, un solo elemento, el arreglo vacío y la venta con cantidad 0.
 Todas las comparaciones entre ciclo y métodos dieron OK y el resultado final fue TODO OK.
+
+
+---
+
+# CUARTO MINIRETO
+
+# DÍA 1 — CUARTO MINIRETO
+Reporte de negocio (v0.1) y depuración de errores reportados.
+
+## Error 1: "Bogotá" aparece dos veces — Punto 4, cuarto minireto
+
+- **Síntoma:** en la versión preliminar, una misma ciudad aparece como dos grupos distintos en el reporte (por ejemplo "Bogotá" y "Bogotá ").
+- **Entrada que lo produce:** ventas cuya ciudad está escrita distinto: con un espacio al final ("Bogotá ") o en minúscula ("medellín", id 5 de los datos reales).
+- **Hipótesis:** el agrupamiento usa el texto de la ciudad tal cual, y en un objeto cada texto distinto es una clave distinta.
+- **Prueba realizada:** ejecuté la versión preliminar en src/depurar.js y mostré las claves con Object.keys. Con la entrada de Bogotá devolvió ['Bogotá', 'Bogotá '], y con los datos reales separó 'Medellín' y 'medellín'.
+- **Causa:** no se normalizaba el nombre de la ciudad antes de usarlo como clave del grupo.
+- **Corrección:** totalPorCiudad aplica titulo() (quita espacios sobrantes, pasa a minúsculas y pone mayúscula inicial) antes de agrupar.
+- **Demostración en mi versión:** Object.keys(totalPorCiudad(...)) devuelve ['Bogotá'] y ['Medellín', 'Bogotá', 'Cali', 'Pereira']; la prueba sinDuplicados da OK.
+
+## Error 2: el ticket promedio da NaN en un día sin ventas — Punto 4, cuarto minireto
+
+- **Síntoma:** al filtrar un día sin ventas, el ticket promedio aparece como NaN.
+- **Entrada que lo produce:** un arreglo vacío, por ejemplo las ventas del día "2026-09-07" (no existe ninguna).
+- **Hipótesis:** se divide el total (0) entre la cantidad de ventas (0), y 0 / 0 no es un número válido.
+- **Prueba realizada:** en src/depurar.js filtré el día sin ventas (resultado []), mostré 0 / 0 (da NaN) y ejecuté la versión preliminar, que devolvió NaN.
+- **Causa:** la versión preliminar divide entre ventas.length sin revisar si es 0.
+- **Corrección:** ticketPromedio cuenta solo las ventas válidas (cantidad > 0) y, si ese contador es 0, devuelve 0 antes de dividir. ventasDelDia reutiliza esa función.
+- **Demostración en mi versión:** ticketPromedio([]) devuelve 0 y Number.isNaN da false; ventasDelDia(ventas, "2026-09-07") devuelve ticketPromedio 0 y el reporte muestra "Sin ventas registradas este día".
+
+## Verificación del reporte — Punto 6, cuarto minireto
+
+Ejecuté reporte.js y busqué "NaN" y "undefined" en su salida con findstr: sin coincidencias.
+Cada ciudad y cada producto aparece una sola vez. verificar.js terminó en TODO OK y depurar.js confirmó que mi versión no repite grupos ni devuelve NaN.
+
+
+
+---
+
+# DÍA 2 — MINIRETO 1
+Generador de datos y medición del crecimiento del trabajo.
+
+## Predicción antes de medir — Punto 3, minireto 1 del día 2
+
+**Reglas de conteo:** sumo 1 cada vez que visito un elemento del arreglo y 1 por cada comparación (incluida la búsqueda de una clave en el diccionario).
+
+**Pregunta:** si n se multiplica por 10, ¿cuánto se multiplica el número de operaciones de cada función?
+
+| Función | Si n se multiplica por 10, las operaciones... | Razón |
+|---|---|---|
+| totalVendido | se multiplican por 10 | Un solo ciclo que visita cada venta una vez. |
+| ventaMayor | se multiplican por 10 | Un solo ciclo; en cada vuelta hace un número fijo de comparaciones. |
+| totalPorCiudad | se multiplican por 10 | Un solo ciclo; en cada vuelta hace un número fijo de pasos, porque hay pocas ciudades y el diccionario encuentra el grupo directamente. |
+| primeraVenta | no cambian (×1) | Accede directo a la posición 0 sin recorrer nada. |
+
+**Predicción numérica con n = 100:** totalVendido ≈ 100, ventaMayor ≈ 300, totalPorCiudad ≈ 200, primeraVenta = 1.
