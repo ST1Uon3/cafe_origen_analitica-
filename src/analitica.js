@@ -144,6 +144,55 @@ function ventasDelDia(ventas, fecha) {
   };
 }
 
+// ===== Versiones instrumentadas (día 2): cuentan sus operaciones =====
+
+// Cuenta: 1 por cada elemento visitado
+function totalVendidoContado(ventas, contador) {
+  let total = 0;
+  for (const venta of ventas) {
+    contador.operaciones++;                 // visito un elemento
+    total = total + valorVenta(venta);
+  }
+  return total;
+}
+
+// Cuenta: 1 por elemento visitado + 1 por la comparación mayor === null
+// + 1 por la comparación de valores (esta solo desde la segunda venta)
+function ventaMayorContada(ventas, contador) {
+  let mayor = null;
+  for (const venta of ventas) {
+    contador.operaciones++;                 // visito un elemento
+    contador.operaciones++;                 // comparación: mayor === null
+    if (mayor === null) {
+      mayor = venta;
+    } else {
+      contador.operaciones++;               // comparación: valorVenta(venta) > valorVenta(mayor)
+      if (valorVenta(venta) > valorVenta(mayor)) {
+        mayor = venta;
+      }
+    }
+  }
+  return mayor;
+}
+
+// Cuenta: 1 por elemento visitado + 1 por la búsqueda de la clave en el diccionario
+function totalPorCiudadContado(ventas, contador) {
+  const grupos = {};
+  for (const venta of ventas) {
+    contador.operaciones++;                 // visito un elemento
+    const ciudad = titulo(venta.ciudad);
+    contador.operaciones++;                 // busco la clave en el diccionario (comparación)
+    grupos[ciudad] = (grupos[ciudad] || 0) + valorVenta(venta);
+  }
+  return grupos;
+}
+
+// Paso 5: complejidad constante (no recorre nada)
+function primeraVenta(ventas, contador) {
+  contador.operaciones++;                   // un solo acceso a la posición 0
+  return ventas.length > 0 ? ventas[0] : null;
+}
+
 module.exports = {
   valorVenta,
   totalVendido,
@@ -158,4 +207,8 @@ module.exports = {
   unidadesPorProducto,
   topProductosPorValor,
   ventasDelDia,
+  totalVendidoContado,
+  ventaMayorContada,
+  totalPorCiudadContado,
+  primeraVenta,
 };
