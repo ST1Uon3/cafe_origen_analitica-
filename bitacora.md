@@ -300,3 +300,119 @@ Predicción numérica con n = 100: totalVendido ≈ 100, ventaMayor ≈ 300 y to
 - Ninguna función es O(n²), porque ninguna tiene un ciclo dentro de otro ciclo. Si existiera una, al multiplicar n por 10 sus operaciones se multiplicarían por 100.
 - Las constantes (3n − 1, 2n) no cambian la clasificación: lo que importa es que el trabajo crece en proporción directa a n.
 - Para sumar n ventas hay que visitarlas todas, así que O(n) es lo mínimo posible en estas tres funciones; no se puede hacer mejor.
+
+
+---
+
+# DÍA 2 — MINIRETO 2
+Diagnóstico de complejidad de clientesRecurrentes.
+
+## Traza con 5 ventas y número de comparaciones — Punto 2, minireto 2 del día 2
+
+Clientes del arreglo de prueba: [C01, C02, C03, C01, C04]
+
+| i | j | cliente[i] | cliente[j] | ¿Iguales? | Acción | recurrentes |
+|---|---|---|---|---|---|---|
+| 0 | 1 | C01 | C02 | no | nada | [] |
+| 0 | 2 | C01 | C03 | no | nada | [] |
+| 0 | 3 | C01 | C01 | sí | includes("C01") da false, agrego C01 | [C01] |
+| 0 | 4 | C01 | C04 | no | nada | [C01] |
+| 1 | 2 | C02 | C03 | no | nada | [C01] |
+| 1 | 3 | C02 | C01 | no | nada | [C01] |
+| 1 | 4 | C02 | C04 | no | nada | [C01] |
+| 2 | 3 | C03 | C01 | no | nada | [C01] |
+| 2 | 4 | C03 | C04 | no | nada | [C01] |
+| 3 | 4 | C01 | C04 | no | nada | [C01] |
+| 4 | - | C04 | (no hay ventas después) | - | el ciclo interno no se ejecuta | [C01] |
+
+Total: **10 comparaciones** de cliente. Resultado: [C01].
+
+### Generalización para n ventas
+
+Por cada i, el ciclo interno compara con (n − 1 − i) ventas:
+- i = 0: n − 1 comparaciones
+- i = 1: n − 2 comparaciones
+- ...
+- i = n − 1: 0 comparaciones
+
+Suma = (n − 1) + (n − 2) + ... + 1 + 0 = **n(n − 1) / 2** = (n² − n) / 2.
+
+| n | comparaciones |
+|---|---|
+| 5 | 10 |
+| 12 | 66 |
+| 1.000 | 499.500 |
+| 16.000 | 127.992.000 |
+| 100.000 | 4.999.950.000 |
+| 1.000.000 | 499.999.500.000 |
+
+Conclusión: el número de comparaciones crece como n² (el término dominante de (n² − n) / 2), por eso la función es O(n²).
+
+## Tiempos medidos — Punto 3, minireto 2 del día 2
+
+Medido en mi computador con Node.js, usando console.time y console.timeEnd, con ventas generadas al azar.
+
+| n | tiempo (ms) | comparaciones | veces más que la fila anterior |
+|---|---|---|---|
+| 1.000 | 12.46 | 499.500 | '-' |
+| 2.000 |  30.14 | 1.999.000 | '2.42' |
+| 4.000 |  162.04 | 7.998.000 |  '5.38' |
+| 8.000 |  597.74 | 31.996.000 | '3.69' |
+| 16.000 | 1967.6 | 127.992.000 | '3.29' |
+
+## Análisis de la tabla — Punto 4, minireto 2 del día 2
+
+- **Cuando n se duplica, el tiempo se multiplica por ≈ ['2.42', '5.38', '3.69', '3.29' ]** (valores medidos en la columna "veces más que la fila anterior").
+- **Relación con O(n²):** si el trabajo es proporcional a n², al duplicar n queda (2n)² = 4n². Por eso lo esperado es ×4, y lo medido se acerca a ese valor.
+- **Segunda evidencia:** el tiempo por comparación (ns por comparación) se mantiene casi constante, [ 24.95, 15.08, 20.26, 18.68, 15.37 ] ns aprox., así que el tiempo total depende solo de cuántas comparaciones se hacen, y esas crecen como n(n − 1)/2.
+- **Contraste con O(n):** en una función lineal, al duplicar n el tiempo se duplicaría (×2). Aquí se cuadruplica, así que el crecimiento es mucho más rápido.
+- **Nota:** con n pequeño (1.000 y 2.000) la razón puede desviarse por el ruido de medir tiempos de pocos milisegundos.
+
+## Estimación de tiempos — Punto 5, minireto 2 del día 2
+
+Fórmula: t(n) ≈ t(16.000) × (n / 16.000)², porque el tiempo crece como n².
+
+Dato base: con n = 16.000 la función tardó [ ] ms.
+
+| n | Estimación | Cómo se calculó |
+|---|---|---|
+| 100.000 | 81.6 segundos | t(16.000) × 39,06 |
+| 1.000.000 | 2.3 horas | t(16.000) × 3.906,25 |
+
+- ¿Se ejecutó 100.000? [Sí, porque la estimación fue menor a 2 minutos].
+- Resultado real con 100.000 (si se ejecutó): [81.6 segundos ] frente a la estimación de [2 minutos ].
+- Con 1.000.000 de ventas no se ejecuta: la estimación es de [2.3 horas ], y harían falta unas 500.000 millones de comparaciones.
+
+## Costo oculto de includes — Punto 6, minireto 2 del día 2
+
+- **Qué hace includes:** recorre el arreglo recurrentes hasta encontrar el cliente. Si recurrentes tiene r elementos, hace hasta r comparaciones.
+- **Dónde está:** dentro de los dos ciclos. Se ejecuta cada vez que dos ventas son del mismo cliente, incluso si ese cliente ya está en la lista.
+- **Efecto en la complejidad:** el costo de includes se multiplica por el número de veces que se ejecuta.
+  - Ciclos anidados: hasta n(n − 1)/2 pares → O(n²).
+  - includes: hasta r comparaciones por ejecución, con r hasta n/2.
+- **Peor caso:** n/2 ventas con n/4 clientes distintos (cada uno dos veces) y n/2 ventas de un mismo cliente al final.
+  - Pares iguales ≈ n²/8, cada includes recorre ≈ n/4 elementos → ≈ n³/32 comparaciones.
+  - Complejidad en el peor caso: **O(n³)** (cúbica).
+- **Con n = 1.000 en el peor caso:** 499.500 comparaciones del ciclo doble + ≈ 31 millones de includes.
+- **Prueba medida:**
+
+| n | al azar (ms) | peor caso (ms) | peor caso: veces más que antes |
+|---|---|---|---|
+| 500 | [ ] | [ ] | - |
+| 1.000 | [ ] | [ ] | [ ] |
+| 2.000 | [ ] | [ ] | [ ] |
+| 4.000 | [ ] | [ ] | [ ] |
+
+- **Conclusión:** en el peor caso, al duplicar n el tiempo se acerca a ×8 (cúbico) en vez de ×4 (cuadrático). Con datos normales includes suma un costo del mismo orden que el ciclo doble, pero en el peor caso lo empeora un orden más.
+
+## Conclusión para la gerente — Punto 7, minireto 2 del día 2
+
+**¿Por qué el reporte de clientes recurrentes se vuelve lento?**
+
+El reporte averigua quién compró más de una vez tomando cada compra y comparándola con todas las compras que vienen después. Es como si, para saber qué clientes se repiten, alguien revisara cada factura contra todas las demás una por una.
+
+Con pocas ventas eso es instantáneo. Pero el trabajo no crece al mismo ritmo que las ventas, crece mucho más rápido: si el historial se duplica, el trabajo se multiplica por cuatro; si se multiplica por diez, el trabajo se multiplica por cien. Con un historial anual, con cientos de miles de compras, son decenas de miles de millones de comparaciones, y por eso el computador "se queda pensando varios minutos". En mis pruebas, con 16.000 ventas tardó [ ] segundos, y estimo que con un millón de ventas tardaría [ ].
+
+Además, cada vez que el reporte encuentra un cliente repetido, vuelve a revisar desde el principio la lista de clientes que ya anotó, lo que empeora la lentitud cuando hay muchos clientes.
+
+**No es un error ni un daño:** el reporte da resultados correctos, solo que el procedimiento es poco eficiente para volúmenes grandes. Se puede resolver cambiando la forma de contar: en vez de comparar cada compra con todas las demás, llevar una libreta donde se anote cuántas veces compró cada cliente, mirando cada compra una sola vez. Con eso el tiempo crecería solo en proporción a las ventas: el doble de ventas, el doble de tiempo.
