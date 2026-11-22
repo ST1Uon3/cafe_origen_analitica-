@@ -416,3 +416,83 @@ Con pocas ventas eso es instantáneo. Pero el trabajo no crece al mismo ritmo qu
 Además, cada vez que el reporte encuentra un cliente repetido, vuelve a revisar desde el principio la lista de clientes que ya anotó, lo que empeora la lentitud cuando hay muchos clientes.
 
 **No es un error ni un daño:** el reporte da resultados correctos, solo que el procedimiento es poco eficiente para volúmenes grandes. Se puede resolver cambiando la forma de contar: en vez de comparar cada compra con todas las demás, llevar una libreta donde se anote cuántas veces compró cada cliente, mirando cada compra una sola vez. Con eso el tiempo crecería solo en proporción a las ventas: el doble de ventas, el doble de tiempo.
+
+---
+
+# DÍA 2 — MINIRETO 3
+Complejidad espacial y comparación entre cadena de métodos y recorrido único.
+
+## Recorridos, arreglos nuevos y Big O — Punto 4, minireto 3 del día 2
+
+Medido con n = 10.000 ventas generadas al azar y la ciudad Medellín (k = ventas de esa ciudad, k ≤ n).
+
+| | totalCiudadCadena | totalCiudadUnaPasada |
+|---|---|---|
+| Recorridos | map y filter sobre las n ventas, map y reduce sobre las k de la ciudad: 2n + 2k visitas. Máximo 4 recorridos completos (si k = n). | 1 recorrido de las n ventas. |
+| Visitas medidas | '9.76' (≈ 2,5 × n) | '2.50' (= n) |
+| Arreglos nuevos | 3: el primer map guarda n objetos copiados, el filter guarda k y el segundo map guarda k. |  3 |
+| Elementos guardados en arreglos nuevos | 15044 (n + 2k) |  0 |
+| **Big O de tiempo** | **O(n)** | **O(n)** |
+| **Big O de espacio** | **O(n)** | **O(1)** |
+
+**Por qué el espacio de la cadena es O(n):** en el peor caso (k = n) guarda n + n + n elementos, o sea 3n, y la memoria adicional crece en proporción a n. Además, el primer map crea n objetos nuevos (no solo referencias), lo que es lo más costoso en memoria.
+
+**Por qué el espacio de la versión de una pasada es O(1):** solo usa dos variables simples (buscada y total) y la memoria temporal pequeña de normalizar, que se libera enseguida. No depende de n.
+
+## Por qué ambas son O(n) en tiempo — Punto 5, minireto 3 del día 2
+
+- **Trabajo de cada versión:** la cadena hace 2n + 2k visitas (como máximo 4n, cuando k = n) y la de una pasada hace n.
+- **Regla de simplificación:** en Big O se eliminan las constantes. 4n, 2n + 2k y n son todas O(n), porque crecen en proporción directa a n.
+- **Evidencia medida:** al multiplicar n por 10, las visitas se multiplicaron por 10 en la cadena y por 10 en la de una pasada. Ambas crecen ×10.
+
+| n | visitas cadena | visitas una pasada |
+|---|---|---|
+| 1.000 | '9.76' | '10.00' |
+| 10.000 | '9.76' | '10.00' |
+| 100.000 | '9.76' | '10.00' |
+
+- **Qué sí cambia:** la constante. La cadena hace entre 2,5 y 4 veces más visitas que la de una pasada, así que en la práctica es más lenta, aunque pertenezca a la misma clase.
+- **Conclusión:** Big O sirve para saber cómo crece el trabajo, no para decir cuál es más rápida. Para decidir entre dos versiones de la misma clase, hay que mirar la constante y también la memoria (espacio), donde sí difieren: O(n) contra O(1).
+
+## Complejidad espacial de las funciones del motor — Punto 6, minireto 3 del día 2
+
+Se cuenta la memoria adicional que crea cada función, sin contar el arreglo ventas que recibe. g = ciudades distintas, p = productos distintos, k = ventas filtradas (todos ≤ n).
+
+| Función | Espacio adicional | Por qué |
+|---|---|---|
+| valorVenta | O(1) | Una multiplicación. |
+| totalVendido, unidadesVendidas | O(1) | Un acumulador numérico. |
+| ventaMayor | O(1) | Guarda una referencia al registro mayor, no una copia. |
+| ticketPromedio | O(1) | Dos números: total y contador. |
+| ventasPorCiudad | O(1) | Un acumulador. |
+| totalVendidoM, unidadesVendidasM | O(1) | reduce usa un acumulador y no crea arreglos. |
+| ventasPorCiudadM | O(n) | filter crea un arreglo de k ventas y map otro de k valores (k ≤ n). |
+| totalPorCiudad | O(g) | El diccionario guarda una clave por ciudad distinta, no por venta. Con pocas ciudades es casi constante; en el peor caso (cada venta de una ciudad distinta) llega a O(n). |
+| unidadesPorProducto | O(p) | Igual que totalPorCiudad: una clave por producto distinto. |
+| topProductosPorValor | O(p) | Crea el diccionario de p productos y varios arreglos de tamaño p (entries, map, slice). Ordena esa copia, no las n ventas. En el peor caso p = n. |
+| ventasDelDia | O(n) en el peor caso | filter crea un arreglo con las ventas del día (hasta n) y otro filter para contar las válidas. |
+| totalVendidoContado, ventaMayorContada, primeraVenta | O(1) | Solo variables simples y el contador. |
+| totalPorCiudadContado | O(g) | Usa un diccionario como totalPorCiudad. |
+| clientesRecurrentes | O(n) en el peor caso | El arreglo recurrentes crece con los clientes repetidos (hasta n/2); includes no crea arreglos. |
+| totalCiudadCadena | O(n) | Tres arreglos intermedios. |
+| totalCiudadUnaPasada | O(1) | Un acumulador y una variable. |
+| generarVentas | O(n) | Su resultado es un arreglo de n ventas (es la salida, no memoria auxiliar). |
+
+### Lo que se aprende
+- **Memoria adicional constante, O(1):** las funciones con un solo ciclo y un acumulador, y las que usan reduce con un acumulador.
+- **Memoria proporcional a los datos, O(n):** las que crean arreglos intermedios (filter y map encadenados, ventasDelDia) o copias.
+- **totalPorCiudad y topProductosPorValor** no dependen de n sino del número de grupos (ciudades o productos). Como en este negocio hay pocos grupos, en la práctica gastan poco, pero no son O(1): si los grupos crecen, la memoria también.
+- Usar filter y map encadenados es cómodo, pero cada paso reserva memoria nueva. Un solo reduce o un ciclo con acumulador evita esos arreglos.
+
+## Decisión: qué versión de totalCiudad queda en el motor — Punto 7, minireto 3 del día 2
+
+**Decisión:** dejo totalCiudadUnaPasada en el motor.
+
+**Justificación:**
+- **Recursos:** usa memoria adicional O(1) frente a O(n) de la cadena, que crea 3 arreglos y copia n objetos en el primer map. En un servidor con memoria limitada, eso decide.
+- **Tiempo:** ambas son O(n), pero la de una pasada hace entre 2,5 y 4 veces menos visitas.
+- **Legibilidad:** la cadena se lee como una receta, pero el ciclo ya es corto y claro (una condición y un acumulador). Con un comentario, la diferencia de claridad es pequeña.
+- **Cuándo aceptaría la cadena:** con pocos datos, código que se ejecuta una sola vez, o un equipo que prefiera el estilo declarativo y no tenga límite de memoria.
+- **Alternativa intermedia no elegida:** un solo reduce con la condición adentro (una pasada, sin arreglos intermedios, estilo funcional).
+- **Observación:** totalCiudadUnaPasada es funcionalmente igual a ventasPorCiudad (primer día). No las unifico ahora para no romper verificar.js ni reporte.js.
+- **Qué hice con la otra:** totalCiudadCadena sale del motor y se conserva en src/comparar.js solo como referencia de la comparación.
