@@ -131,6 +131,19 @@ function topProductosPorValor(ventas, k) {
     .slice(0, k);
 }
 
+// Resumen de un día: filtra las ventas de esa fecha y reutiliza los indicadores
+function ventasDelDia(ventas, fecha) {
+  const dia = String(fecha).trim();
+  const delDia = ventas.filter(venta => venta.fecha === dia);
+  return {
+    fecha: dia,
+    numeroVentas: delDia.filter(venta => venta.cantidad > 0).length,
+    unidades: unidadesVendidasM(delDia),
+    total: totalVendidoM(delDia),
+    ticketPromedio: ticketPromedio(delDia),
+  };
+}
+
 module.exports = {
   valorVenta,
   totalVendido,
@@ -144,4 +157,5 @@ module.exports = {
   totalPorCiudad,
   unidadesPorProducto,
   topProductosPorValor,
+  ventasDelDia,
 };
