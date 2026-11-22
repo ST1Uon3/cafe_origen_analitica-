@@ -207,8 +207,21 @@ function clientesRecurrentes(ventas) {
   return recurrentes;
 }
 
+// Versión de una pasada: un solo ciclo, sin arreglos intermedios
+function totalCiudadUnaPasada(ventas, ciudad) {
+  const buscada = normalizar(ciudad);
+  let total = 0;
+  for (const venta of ventas) {
+    if (normalizar(venta.ciudad) === buscada) {
+      total = total + valorVenta(venta);
+    }
+  }
+  return total;
+}
+
 module.exports = {
   valorVenta,
+  normalizar,
   totalVendido,
   unidadesVendidas,
   ventaMayor,
@@ -226,4 +239,5 @@ module.exports = {
   totalPorCiudadContado,
   primeraVenta,
   clientesRecurrentes,
+  totalCiudadUnaPasada,
 };
