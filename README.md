@@ -20,6 +20,8 @@ Otros comandos:
     node src\medirRecurrentes.js   (mide el tiempo de clientesRecurrentes al crecer los datos)
     node src\comparar.js   (compara tiempo y memoria de una cadena de métodos y un recorrido único)
     node src\medirRendimiento.js   (mide todas las funciones y actualiza RENDIMIENTO.md)
+    node src\verificarRecurrentes.js   (comprueba que las tres versiones de clientes recurrentes dan lo mismo)
+    node src\medirOptimizacion.js      (mide las tres versiones con hasta 100.000 ventas)
 
 Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 
@@ -36,6 +38,7 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - ¿Qué clientes compraron más de una vez?
 - ¿Cuánta memoria adicional usa cada versión de un cálculo?
 - ¿Cuánto tardaría cada reporte con 1.000.000 de ventas y qué conviene optimizar primero?
+- ¿Cuántas veces compró cada cliente?
 
 ## Estructura
 - `src/datos.js`: ventas originales (12 registros, con sus errores)
@@ -51,6 +54,8 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - `src/comparar.js`: compara una cadena de métodos con un recorrido único
 - `src/medirRendimiento.js`: mide el rendimiento de todas las funciones
 - `RENDIMIENTO.md`: informe técnico de rendimiento (tiempo, memoria, proyección y riesgos)
+- `src/verificarRecurrentes.js`: verifica las versiones de clientes recurrentes
+- `src/medirOptimizacion.js`: mide la mejora de la optimización
 
 ## Decisiones importantes
 - Las ventas con cantidad 0 no cuentan como ventas válidas en el ticket promedio.
