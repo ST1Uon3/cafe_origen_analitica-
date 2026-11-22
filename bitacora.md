@@ -145,3 +145,62 @@ Resultado a mano: la venta mayor es el id 10 (168000). Coincide con el programa.
 
 Ventas válidas (cantidad > 0): 11 (todas menos el id 8).
 Total válido: 985000. Ticket promedio = 985000 / 11 ≈ 89545.45. Coincide con el programa.
+
+---
+
+## TERCER MINIRETO
+Indicadores con métodos de arreglo, agrupaciones y rankings.
+
+## Preguntas que responde cada función — Punto 6, tercer minireto
+
+### totalVendidoM
+- ¿Qué recorro? Todas las ventas (con reduce).
+- ¿Qué filtro? Nada.
+- ¿Qué transformo? Cada venta en su valor con valorVenta.
+- ¿Qué acumulo? La suma de los valores, iniciando en 0.
+- ¿Cómo agrupo? No agrupo.
+
+### unidadesVendidasM
+- ¿Qué recorro? Todas las ventas (con reduce).
+- ¿Qué filtro? Nada.
+- ¿Qué transformo? Nada, uso venta.cantidad directamente.
+- ¿Qué acumulo? La suma de las cantidades, iniciando en 0.
+- ¿Cómo agrupo? No agrupo.
+
+### ventasPorCiudadM
+- ¿Qué recorro? Todas las ventas.
+- ¿Qué filtro? Con filter, las ventas cuya ciudad normalizada coincide con la buscada.
+- ¿Qué transformo? Con map, cada venta filtrada en su valor.
+- ¿Qué acumulo? Con reduce, la suma de esos valores, iniciando en 0.
+- ¿Cómo agrupo? No agrupo, devuelvo un solo total.
+
+### totalPorCiudad
+- ¿Qué recorro? Todas las ventas (con reduce).
+- ¿Qué filtro? Nada.
+- ¿Qué transformo? El nombre de la ciudad (sin espacios sobrantes y con mayúscula inicial) y la venta en su valor.
+- ¿Qué acumulo? El dinero de cada ciudad dentro de un objeto que inicia vacío ({}).
+- ¿Cómo agrupo? Con un objeto como diccionario, donde la clave es la ciudad normalizada.
+
+### unidadesPorProducto
+- ¿Qué recorro? Todas las ventas (con reduce).
+- ¿Qué filtro? Nada; la venta con cantidad 0 suma 0.
+- ¿Qué transformo? Nada, uso venta.cantidad.
+- ¿Qué acumulo? Las unidades de cada producto, en un objeto que inicia vacío ({}).
+- ¿Cómo agrupo? Con un objeto como diccionario, donde la clave es el producto.
+
+### topProductosPorValor
+- ¿Qué recorro? Todas las ventas (con reduce) y después las entradas del diccionario.
+- ¿Qué filtro? Con slice(0, k) me quedo solo con los k primeros.
+- ¿Qué transformo? Cada venta en su valor, y cada par [producto, total] en un objeto { producto, total }.
+- ¿Qué acumulo? El dinero de cada producto.
+- ¿Cómo agrupo? Por producto, con un diccionario; luego ordeno de mayor a menor un arreglo nuevo (Object.entries) para no modificar el original.
+
+### Resultado con arreglo vacío
+- totalPorCiudad([]) y unidadesPorProducto([]) devuelven {}.
+- topProductosPorValor([], 3) devuelve [].
+- Las versiones M devuelven 0, igual que las versiones con ciclo.
+
+## Resultado de verificar.js — Punto 7, tercer minireto
+
+Ejecuté verificar.js con el arreglo completo, un solo elemento, el arreglo vacío y la venta con cantidad 0.
+Todas las comparaciones entre ciclo y métodos dieron OK y el resultado final fue TODO OK.
