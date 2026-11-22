@@ -17,6 +17,7 @@ Otros comandos:
     node src\verificar.js   (comprueba que los ciclos y los métodos dan lo mismo)
     node src\depurar.js     (reproduce y demuestra la corrección de errores reportados)
     node src\medir.js       (cuenta las operaciones de cada función al crecer los datos)
+    node src\medirRecurrentes.js   (mide el tiempo de clientesRecurrentes al crecer los datos)
 
 Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 
@@ -30,6 +31,7 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - ¿Cuáles son los 3 productos que más dinero generaron?
 - ¿Cómo le fue a la tienda en un día específico (incluso si no hubo ventas)?
 - ¿Cuánto crece el trabajo de cada función cuando crecen los datos?
+- ¿Qué clientes compraron más de una vez?
 
 ## Estructura
 - `src/datos.js`: ventas originales (12 registros, con sus errores)
@@ -41,6 +43,7 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - `bitacora.md`: decisiones, casos borde y depuración
 - `src/generador.js`: genera historiales de ventas de tamaño n
 - `src/medir.js`: cuenta las operaciones de cada función al crecer n
+- `src/medirRecurrentes.js`: mide y estima el tiempo de clientesRecurrentes
 
 ## Decisiones importantes
 - Las ventas con cantidad 0 no cuentan como ventas válidas en el ticket promedio.
