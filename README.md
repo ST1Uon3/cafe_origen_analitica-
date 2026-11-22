@@ -18,6 +18,7 @@ Otros comandos:
     node src\depurar.js     (reproduce y demuestra la corrección de errores reportados)
     node src\medir.js       (cuenta las operaciones de cada función al crecer los datos)
     node src\medirRecurrentes.js   (mide el tiempo de clientesRecurrentes al crecer los datos)
+    node src\comparar.js   (compara tiempo y memoria de una cadena de métodos y un recorrido único)
 
 Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 
@@ -32,6 +33,7 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - ¿Cómo le fue a la tienda en un día específico (incluso si no hubo ventas)?
 - ¿Cuánto crece el trabajo de cada función cuando crecen los datos?
 - ¿Qué clientes compraron más de una vez?
+- ¿Cuánta memoria adicional usa cada versión de un cálculo?
 
 ## Estructura
 - `src/datos.js`: ventas originales (12 registros, con sus errores)
@@ -44,6 +46,7 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - `src/generador.js`: genera historiales de ventas de tamaño n
 - `src/medir.js`: cuenta las operaciones de cada función al crecer n
 - `src/medirRecurrentes.js`: mide y estima el tiempo de clientesRecurrentes
+- `src/comparar.js`: compara una cadena de métodos con un recorrido único
 
 ## Decisiones importantes
 - Las ventas con cantidad 0 no cuentan como ventas válidas en el ticket promedio.
