@@ -639,3 +639,70 @@ Medido en mi computador con Node.js, con ventas generadas al azar (src/medirOpti
 
 ### Regla general
 Cuando hay una búsqueda dentro de un ciclo, hay que preguntarse qué información se puede guardar para no volver a buscarla. Casi siempre se cambia un poco de memoria por mucho tiempo.
+
+
+---
+
+# DÍA 3 — MINIRETO 2
+Combos de regalo y conteo de frecuencias con Map.
+
+## Entender el problema
+
+- El catálogo contiene ocho productos con su precio en pesos colombianos.
+- Para una tarjeta de valor dado, se buscan dos productos distintos cuya suma sea exacta.
+- En las ventas, el producto estrella de una ciudad es el que aparece en más filas; cada fila cuenta una vez, incluso si su cantidad es 0, siguiendo el criterio de historial.
+- El cliente único es quien aparece exactamente una vez y se devuelve el primero según el orden de las ventas.
+
+## Casos y decisiones
+
+| Caso | Resultado esperado |
+|---|---|
+| Tarjeta de $87.000 | Origen Huila 500 g ($42.000) + Origen Sierra 500 g ($45.000) |
+| Tarjeta de $61.000 | Origen Nariño 250 g ($26.000) + Taza de cerámica ($35.000) |
+| Valor sin pareja, por ejemplo $1 | `null` |
+| Catálogo vacío | `null` |
+| Ventas vacías para estrella | `[]` |
+| Ventas vacías para cliente único | `null` |
+| Empate de productos en una ciudad | Gana el producto cuya primera venta apareció antes |
+| Ciudad con diferencias de mayúsculas/espacios | Se agrupa tras normalizar el nombre |
+
+## Fuerza bruta: comboRegaloFuerzaBruta
+
+Prueba todos los pares con índices `i < j`, por lo que nunca combina un producto consigo mismo. Si encuentra una suma exacta devuelve ambos objetos; si termina sin encontrarla devuelve `null`.
+
+- Tiempo: O(p²), donde p es el número de productos del catálogo (p(p−1)/2 pares en el peor caso).
+- Espacio adicional: O(1), sin contar el arreglo de dos productos devuelto.
+
+## Optimización con complemento: comboRegalo
+
+El Map guarda `precio → productos vistos con ese precio`. En cada elemento calcula `valor − precio` y consulta el Map antes de guardar el actual; así solo combina con un producto anterior y se asegura que sean distintos, incluso con productos del mismo precio.
+
+Traza para $87.000:
+
+| Paso | Producto actual | Complemento buscado | Map antes de guardar | Acción |
+|---|---|---:|---|---|
+| 1 | Origen Nariño 250 g ($26.000) | $61.000 | vacío | No aparece; guardar $26.000 |
+| 2 | Origen Huila 500 g ($42.000) | $45.000 | $26.000 → Nariño | No aparece; guardar $42.000 |
+| 3 | Origen Sierra 500 g ($45.000) | $42.000 | $26.000 → Nariño; $42.000 → Huila | Aparece; devolver Huila + Sierra |
+
+- Tiempo esperado: O(p), una pasada y consultas Map de tiempo promedio O(1).
+- Espacio adicional: O(p), hasta guardar todos los productos.
+
+## Frecuencias de ventas
+
+`productoEstrellaPorCiudad` usa un Map exterior por ciudad y un Map interior `producto → cantidad de filas`. Recorre las ventas y luego los grupos para escoger el máximo. El Map conserva orden de inserción: al reemplazar el máximo solo cuando la frecuencia es estrictamente mayor, los empates se resuelven a favor del primero visto. Devuelve una lista de `{ ciudad, producto, frecuencia }`; con ventas vacías devuelve `[]`.
+
+`primerClienteUnico` hace dos recorridos: el primero cuenta con un Map las apariciones de cada cliente; el segundo sigue el orden original y devuelve el primero cuya frecuencia es 1. Si no existe, devuelve `null`.
+
+| Función | Tiempo | Espacio adicional | Justificación |
+|---|---|---|---|
+| `comboRegaloFuerzaBruta` | O(p²) | O(1) | Examina cada par de productos |
+| `comboRegalo` | O(p) | O(p) | Una pasada y un Map de precios vistos |
+| `productoEstrellaPorCiudad` | O(n) promedio | O(n) | Dos recorridos sobre grupos/ventas; los Map guardan las frecuencias |
+| `primerClienteUnico` | O(n) promedio | O(c) | Dos pasadas y un Map de c clientes distintos |
+
+La guía pide clasificar las tres funciones principales como lineales: `comboRegalo`, `productoEstrellaPorCiudad` y `primerClienteUnico` son O(n) en el tamaño de sus entradas. La versión didáctica de fuerza bruta se mantiene aparte y es O(p²).
+
+## Verificación — microreto 2
+
+Se ejecutó `node src/verificarCatalogo.js`: el combo de $87.000 coincide con fuerza bruta, $61.000 encuentra la pareja esperada, un valor imposible retorna `null`, los casos vacíos y empate se comportan según la regla, y el cliente único del Día 1 es C04. Resultado: TODO OK.
