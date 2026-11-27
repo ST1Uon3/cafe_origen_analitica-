@@ -706,3 +706,86 @@ La guía pide clasificar las tres funciones principales como lineales: `comboReg
 ## Verificación — microreto 2
 
 Se ejecutó `node src/verificarCatalogo.js`: el combo de $87.000 coincide con fuerza bruta, $61.000 encuentra la pareja esperada, un valor imposible retorna `null`, los casos vacíos y empate se comportan según la regla, y el cliente único del Día 1 es C04. Resultado: TODO OK.
+
+
+---
+
+# DÍA 3 — MINIRETO 3
+Ventana deslizante y dos punteros para decisiones comerciales.
+
+## Solución del primer paso — fuerza bruta
+
+`mejorSemanaBruta(dias, k)` vuelve a sumar desde cero cada bloque de k días. Usa índices desde 0 internamente y devuelve el día de inicio desde 1, para que coincida con el calendario de septiembre. Devuelve `null` si el arreglo está vacío, k no es entero positivo o k supera la cantidad de días.
+
+- Tiempo: O((n − k + 1)k), que en el peor caso es O(nk). Si k se mantiene fijo, es O(n).
+- Espacio adicional: O(1).
+
+## Solución del segundo paso — ventana deslizante
+
+`mejorSemana(dias, k)` suma la ventana inicial. Para cada posición siguiente resta el valor que sale y suma el nuevo valor que entra. Si hay empate conserva la ventana más temprana.
+
+Para los 30 días de septiembre y k = 7, devuelve **3.670 miles de pesos**, con inicio el **día 24** y final el día 30. Equivale a $3.670.000.
+
+## Solución del tercer paso — dibujo de las primeras ventanas
+
+```text
+Días:     1   2   3   4   5   6   7   8   9   10  11  12  13
+Valores: 320 410 280 390 510 620 700 300 290 450 480 530 610
+
+Posición 1: [320 410 280 390 510 620 700] = 3.230
+Posición 2:       [410 280 390 510 620 700 300] = 3.210
+                    sale 320; entra 300; 3.230 - 320 + 300 = 3.210
+Posición 3:             [280 390 510 620 700 300 290] = 3.090
+                          sale 410; entra 290; 3.210 - 410 + 290 = 3.090
+```
+
+## Solución del cuarto paso — coincidencia y tiempos
+
+Se compararon las dos funciones en los datos de septiembre y en un arreglo reproducible de 100.000 días generado con semilla 2026. En ambos casos los resultados coinciden. Con k = 7, la corrida local de verificación obtuvo estos tiempos (pueden variar según el computador):
+
+| Entrada | Fuerza bruta | Ventana deslizante | Resultado |
+|---|---:|---:|---|
+| Septiembre, 30 días | ambas devuelven día 24 y 3.670 | ambas devuelven día 24 y 3.670 | Coinciden |
+| 100.000 días, k = 7 | 8,061 ms | 2,174 ms | día 15.921 y total 6.318 |
+
+La fuerza bruta hace aproximadamente (n − k + 1)k sumas. La ventana suma k valores iniciales y luego actualiza cada bloque en O(1), por eso hace O(n) trabajo en total (también O(n) al considerar k como variable: O(k + n − k)). Ambas usan O(1) memoria adicional.
+
+## Solución del quinto paso — par más cercano al presupuesto
+
+`parMasCercano(precios, presupuesto)` ordena una copia del catálogo con comparador numérico `(a, b) => a.precio - b.precio`, así no modifica el catálogo original. Coloca un puntero al precio menor y otro al mayor. Si la suma excede el presupuesto, mueve el puntero derecho a un precio menor; si cabe, guarda la mejor suma y mueve el izquierdo para buscar una suma mayor. No reutiliza un producto porque los punteros nunca se cruzan y el ciclo exige izquierda < derecha.
+
+## Solución del sexto paso — presupuestos y traza
+
+| Presupuesto | Productos seleccionados | Total |
+|---:|---|---:|
+| $100.000 | Filtros de papel x100 ($18.000) + Origen Huila 1 kg ($79.000) | $97.000 |
+| $140.000 | Origen Sierra 500 g ($45.000) + Prensa francesa ($95.000) | $140.000 |
+| $40.000 | No hay dos productos que quepan | `null` |
+
+Traza de dos punteros para $100.000 (precios en miles, ordenados: 18, 26, 35, 42, 45, 79, 95, 120):
+
+| Izquierdo | Derecho | Suma | Decisión |
+|---:|---:|---:|---|
+| 18 | 120 | 138 | Supera el presupuesto; baja el puntero derecho |
+| 18 | 95 | 113 | Supera; baja el derecho |
+| 18 | 79 | 97 | Cabe; guardar 97 como mejor y subir el izquierdo |
+| 26 | 79 | 105 | Supera; baja el derecho |
+| 26 | 45 | 71 | Cabe, pero queda por debajo de 97; subir el izquierdo |
+| 35 | 45 | 80 | Cabe, pero queda por debajo de 97; subir el izquierdo |
+| 42 | 45 | 87 | Cabe, pero queda por debajo de 97; subir el izquierdo; termina |
+
+El resultado nunca supera el presupuesto. Con $40.000 el algoritmo retorna `null` porque el par más barato suma $44.000.
+
+## Solución del séptimo paso — complejidad
+
+| Función / etapa | Tiempo | Espacio adicional | Motivo |
+|---|---|---|---|
+| `mejorSemanaBruta(dias, k)` | O(nk) | O(1) | Vuelve a sumar cada bloque |
+| `mejorSemana(dias, k)` | O(n) | O(1) | Calcula la primera ventana y actualiza cada una en tiempo constante |
+| Ordenar en `parMasCercano` | O(n log n) | O(n) | Se ordena una copia para preservar el catálogo |
+| Dos punteros en `parMasCercano` | O(n) | O(1) aparte de la copia | Cada puntero avanza como máximo n veces |
+| `parMasCercano` completa | O(n log n) | O(n) | Domina el costo del ordenamiento |
+
+## Verificación — microreto 3
+
+Se ejecutó `node src/verificarVentanas.js`. Las versiones de fuerza bruta y ventana deslizante coincidieron en septiembre y en 100.000 días; se verificaron k mayor que n, arreglo vacío, presupuestos $100.000, $140.000 y $40.000, y catálogo vacío. Resultado: TODO OK.

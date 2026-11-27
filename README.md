@@ -23,6 +23,7 @@ Otros comandos:
     node src\verificarRecurrentes.js   (comprueba que las tres versiones de clientes recurrentes dan lo mismo)
     node src\medirOptimizacion.js      (mide las tres versiones con hasta 100.000 ventas)
     node src\verificarCatalogo.js     (comprueba combos de regalo y frecuencias del Día 3)
+    node src\verificarVentanas.js     (compara ventana deslizante y prueba dos punteros)
 
 Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 
@@ -59,6 +60,8 @@ Si las tildes se ven raras en cmd, ejecuta antes `chcp 65001`.
 - `src/medirOptimizacion.js`: mide la mejora de la optimización
 - `src/catalogo.js`: catálogo de fin de año y funciones de combos y frecuencias
 - `src/verificarCatalogo.js`: comprueba los casos del microreto 2 del Día 3
+- `src/ventanas.js`: fuerza bruta y ventana deslizante, y búsqueda de pares cercanos
+- `src/verificarVentanas.js`: verifica resultados y compara tiempos para 100.000 días
 
 ## Decisiones importantes
 - Las ventas con cantidad 0 no cuentan como ventas válidas en el ticket promedio.
